@@ -11,6 +11,8 @@ Well you can now!!
 
 There are three ways you can access the API's through Node: 
 
+You must use the command line interface (Gitbash or equivalent) to use this program. 
+
 1. Search for movies:  
     node liri.js movie-this <movie title here>
 
