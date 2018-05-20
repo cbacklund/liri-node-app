@@ -7,14 +7,16 @@ var fs = require("fs");
 
 
 var command1 = process.argv[2];
+var liriArg = process.argv.slice(3).join(" ");
+
 
 // code for handling the my-tweets command
 if (command1 == "my-tweets") {
     tweetIt(); 
 } else if (command1 == "spotify-this-song") {
-    spotifyIt();
+    spotifyIt(liriArg);
 } else if (command1 == "movie-this") {
-    movieIt();
+    movieIt(liriArg);
 } else if (command1 == "do-what-it-says") {
     doIt();
 } else {
@@ -50,12 +52,13 @@ function tweetIt() {
                 console.log(tweetString);
             });
         }
-    });
+	});
+} // close out of tweetIt function
 
-    function spotifyIt(song) {
-        fs.appendFile("./log.txt", "Request: node liri.js spotify-this-song " + "\n", (err) => {
-            if (err) throw err;
-        });
+function spotifyIt(song) {
+    fs.appendFile("./log.txt", "Request: node liri.js spotify-this-song " + "\n", (err) => {
+        if (err) throw err;
+    });
 
         var spotify = new Spotify(keys.spotify);
 
@@ -85,11 +88,11 @@ function tweetIt() {
                         console.log(errorString2);
                     });
                 } else {
-                    var songString =    "Song Information:\n" +
-                                        "Song Name: " + songTracks.name + "\n" +
-                                        "Artist: " + songTracks.artists[0].name + "\n" +
-                                        "Album: " + songTracks.album.name + "\n" + 
-                                        "Preview Here: " + songTracks.preview_url + "\n";
+					var songString =    "Song Information:\n\n" +
+										"Artist: " + songTracks.artists[0].name + "\n\n" +
+                                        "Song Name: " + songTracks.name + "\n\n" +
+                                        "Album: " + songTracks.album.name + "\n\n" + 
+                                        "Preview Here: " + songTracks.preview_url + "\n\n";
 
                     fs.appendFile("./log.txt", "LIRI says:\n" + songString + "\n", (err) => {
                         if (err) throw err;
@@ -98,12 +101,10 @@ function tweetIt() {
                 }
             }
         })
-    }
+    } // spotifyIt function close out
 
 
-}
-
-// retrieveOMDBInfo will retrieve information on a movie from the OMDB database
+// movieIt function will retrieve information from OMDB
 function movieIt(movie) {
 	// Append the command to the log file
 	fs.appendFile('./log.txt', 'User Command: node liri.js movie-this ' + movie + '\n\n', (err) => {
@@ -122,7 +123,7 @@ function movieIt(movie) {
 	search = search.split(' ').join('+');
 
 	// Construct the query string
-	var queryStr = 'http://www.omdbapi.com/?t=' + search + '&plot=full&tomatoes=true';
+	var queryStr = 'http://www.omdbapi.com/?t=' + search + '&plot=full&tomatoes=true&apikey=trilogy';
 
 	// Send the request to OMDB
 	request(queryStr, function (error, response, body) {
@@ -138,7 +139,7 @@ function movieIt(movie) {
 		} else {
 			var data = JSON.parse(body);
 			if (!data.Title && !data.Released && !data.imdbRating) {
-				var errorStr2 = 'ERROR: No movie info retrieved, please check the spelling of the movie name!';
+				var errorStr2 = 'ERROR: No movie info found, maybe check the spelling?';
 
 				// Append the error string to the log file
 				fs.appendFile('./log.txt', errorStr2, (err) => {
@@ -162,7 +163,7 @@ function movieIt(movie) {
 								'Rotten Tomatoes URL: ' + data.tomatoURL + '\n';
 
 				// Append the output to the log file
-				fs.appendFile('./log.txt', 'LIRI Response:\n\n' + outputStr + '\n', (err) => {
+				fs.appendFile('./log.txt', 'LIRI Says:\n\n' + outputStr + '\n', (err) => {
 					if (err) throw err;
 					console.log(outputStr);
 				});
@@ -195,47 +196,13 @@ function doIt() {
 					break;
 
 				case 'spotify-this-song':
-					spotifySong(param);
+					spotifyIt(param);
 					break;
 
 				case 'movie-this':
-					retrieveOBDBInfo(param);
+					movieIt(param);
 					break;
 			}
 		}
-	});
-}
-
-// Determine which LIRI command is being requested by the user
-if (liriCommand === 'my-tweets') {
-	retrieveTweets(); 
-
-} else if (liriCommand === `spotify-this-song`) {
-	spotifySong(liriArg);
-
-} else if (liriCommand === `movie-this`) {
-	retrieveOBDBInfo(liriArg);
-
-} else if (liriCommand ===  `do-what-it-says`) {
-	doAsYerTold();
-
-} else {
-	// Append the command to the log file
-	fs.appendFile('./log.txt', 'User Command: ' + cmdArgs + '\n\n', (err) => {
-		if (err) throw err;
-
-		// If the user types in a command that LIRI does not recognize, output the Usage menu 
-		// which lists the available commands.
-		outputStr = 'Usage:\n' + 
-				   '    node liri.js my-tweets\n' + 
-				   '    node liri.js spotify-this-song "<song_name>"\n' + 
-				   '    node liri.js movie-this "<movie_name>"\n' + 
-				   '    node liri.js do-what-it-says\n';
-
-		// Append the output to the log file
-		fs.appendFile('./log.txt', 'LIRI Response:\n\n' + outputStr + '\n', (err) => {
-			if (err) throw err;
-			console.log(outputStr);
-		});
 	});
 }

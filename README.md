@@ -12,7 +12,7 @@ Well you can now!!
 There are three ways you can access the API's through Node: 
 
 1. Search for movies:  
-    node liri.js movie-this 
+    node liri.js movie-this <movie title here>
 
 2. Search my tweets:
     node liri.js my-tweets
